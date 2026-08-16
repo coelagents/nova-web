@@ -1,0 +1,100 @@
+name: Chat hardening
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+
+jobs:
+  moderate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate & cap
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const TITLE_RE = /^chat-[a-f0-9]{6,32}$/;
+            const ROLE_USER = "<!-- role:user -->";
+            const ROLE_ADMIN = "<!-- role:admin -->";
+            const MAX_OPEN_CHATS = 60;
+
+            if (context.eventName === "issues" && context.payload.action === "opened") {
+              const issue = context.payload.issue;
+              const wellFormed =
+                TITLE_RE.test(issue.title) &&
+                typeof issue.body === "string" &&
+                issue.body.startsWith(ROLE_USER);
+
+              if (!wellFormed) {
+                await github.rest.issues.update({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  state: "closed",
+                });
+                await github.rest.issues.lock({
+                  ...context.repo,
+                  issue_number: issue.number,
+                });
+                return;
+              }
+
+              // make sure it's labeled even if the client call dropped it
+              const hasLabel = issue.labels.some((l) => l.name === "chat");
+              if (!hasLabel) {
+                await github.rest.issues.addLabels({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  labels: ["chat"],
+                });
+              }
+
+              // flood cap: close oldest open chats beyond the cap
+              const open = await github.paginate(github.rest.issues.listForRepo, {
+                ...context.repo,
+                state: "open",
+                labels: "chat",
+                per_page: 100,
+              });
+              if (open.length > MAX_OPEN_CHATS) {
+                const sorted = open.sort(
+                  (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                );
+                const excess = sorted.slice(0, open.length - MAX_OPEN_CHATS);
+                for (const i of excess) {
+                  await github.rest.issues.update({
+                    ...context.repo,
+                    issue_number: i.number,
+                    state: "closed",
+                  });
+                }
+              }
+              return;
+            }
+
+            if (context.eventName === "issue_comment" && context.payload.action === "created") {
+              const comment = context.payload.comment;
+              const issue = context.payload.issue;
+              const body = comment.body || "";
+              const wellFormed = body.startsWith(ROLE_USER) || body.startsWith(ROLE_ADMIN);
+              if (!wellFormed) {
+                await github.rest.issues.deleteComment({
+                  ...context.repo,
+                  comment_id: comment.id,
+                });
+                return;
+              }
+              // a genuine message landing on a closed-by-cleanup (but not
+              // locked) conversation means the friend came back — reopen it
+              // so it resurfaces in the admin's open-conversations list
+              if (issue.state === "closed" && !issue.locked && body.startsWith(ROLE_USER)) {
+                await github.rest.issues.update({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  state: "open",
+                });
+              }
+            }

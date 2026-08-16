@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nova</title>
+<meta name="description" content="Nova — a fast, focused AI assistant." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <button class="new-chat" id="newChatBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      New chat
+    </button>
+    <div class="history" id="history"></div>
+    <div class="sidebar-footer">
+      <div class="brand-pill">
+        <span class="dot"></span> Nova · online
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="model-picker">
+        <span class="model-name">Nova</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </header>
+
+    <div class="chat" id="chat">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-mark">✦</div>
+        <h1>How can I help you today?</h1>
+        <div class="suggestions">
+          <button class="suggestion" data-text="What can you help me with?">What can you help me with?</button>
+          <button class="suggestion" data-text="Give me a fun fact.">Give me a fun fact.</button>
+          <button class="suggestion" data-text="Help me plan my week.">Help me plan my week.</button>
+          <button class="suggestion" data-text="Explain something to me simply.">Explain something to me simply.</button>
+        </div>
+      </div>
+      <div class="messages" id="messages"></div>
+    </div>
+
+    <div class="composer-wrap">
+      <form class="composer" id="composer">
+        <textarea id="input" placeholder="Message Nova…" rows="1" autocomplete="off"></textarea>
+        <button type="submit" id="sendBtn" aria-label="Send">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </form>
+      <div class="disclaimer">Nova can make mistakes. Consider checking important information.<span class="build-tag"> · build 2.4.1‑nova<span class="tell"> no model here, it's just rudra typing, hi</span></span></div>
+    </div>
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+name: Chat cleanup
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close stale chats
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const STALE_HOURS = 48;
+            const cutoff = Date.now() - STALE_HOURS * 60 * 60 * 1000;
+
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo,
+              state: "open",
+              labels: "chat",
+              per_page: 100,
+            });
+
+            for (const issue of open) {
+              if (new Date(issue.updated_at).getTime() < cutoff) {
+                // close only — never lock, so the widget's next comment
+                // attempt fails cleanly (404/410) and self-heals into a
+                // fresh conversation instead of dead-ending
+                await github.rest.issues.update({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  state: "closed",
+                });
+              }
+            }
