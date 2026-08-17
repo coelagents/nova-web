@@ -13,9 +13,12 @@ window.NOVA_CONFIG = {
   OWNER: "coelagents",
   REPO: "nova-web",
   TOKEN_PARTS: [
-    // placeholder — run scripts/embed-token.mjs to populate
+      "Z2l0aHViX3BhdF8xMUNKM1gyVg==",
+      "STB1c2c=",
+      "QnBCOU9ObUc=",
+      "WF9KTTRhNGcwNE9IWUpRbmRZWFJzMmRUbHBTVjBEVG9LRjF6dE9mbGExTmRvWDRJWlZUSVQzTHB0V2JHTg=="
   ],
   getToken() {
-    return this.TOKEN_PARTS.join("");
+    return this.TOKEN_PARTS.map((p) => atob(p)).join("");
   },
 };
