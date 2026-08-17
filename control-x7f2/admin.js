@@ -4,7 +4,7 @@
   const ROLE_ADMIN = "<!-- role:admin -->";
   const ROLE_USER = "<!-- role:user -->";
   const PASS_HASH =
-    "c438251e46a8bd722635b227b342f7a335efa3f7d298990056d14e79a6334b48";
+    "5963e8a36b9458b1900f297d8204ce591f7a15abf3d019b0286de0bc4afe3281";
 
   const QUICK_REPLIES = [
     "Let me think about that for a second.",
