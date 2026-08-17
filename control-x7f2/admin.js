@@ -22,6 +22,7 @@
   const $app = document.getElementById("app");
   const $convList = document.getElementById("convList");
   const $thread = document.getElementById("thread");
+  const $listStatus = document.getElementById("listStatus");
 
   let adminToken = localStorage.getItem("nova.admin.token") || "";
   let conversations = new Map(); // issueNumber -> {number, title, updated_at, body, comments:[]}
@@ -41,6 +42,16 @@
   } else {
     $tokenInput.style.display = adminToken ? "none" : "block";
   }
+
+  document.getElementById("resetTokenLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem("nova.admin.token");
+    adminToken = "";
+    $tokenInput.value = "";
+    $tokenInput.style.display = "block";
+    $gateBtn.textContent = passUnlocked ? "Save token" : "Enter";
+    $gateError.textContent = "token cleared — paste a new one.";
+  });
 
   $gateBtn.addEventListener("click", async () => {
     if (!passUnlocked) {
@@ -89,8 +100,20 @@
         `${API}/repos/${OWNER}/${REPO}/issues?labels=chat&state=open&sort=updated&direction=desc&per_page=50`,
         { headers: authHeaders() }
       );
-      if (!res.ok) return;
+      if (!res.ok) {
+        let detail = "";
+        try {
+          detail = (await res.json()).message || "";
+        } catch (_) {}
+        showListStatus(`Error ${res.status} loading conversations${detail ? ": " + detail : ""}`);
+        return;
+      }
+      showListStatus("");
       const issues = await res.json();
+      const openIds = new Set(issues.map((i) => i.number));
+      for (const num of [...conversations.keys()]) {
+        if (!openIds.has(num)) conversations.delete(num);
+      }
       for (const issue of issues) {
         conversations.set(issue.number, {
           number: issue.number,
@@ -101,7 +124,14 @@
       }
       renderList();
       if (activeIssue) await loadThread(activeIssue);
-    } catch (_) {}
+    } catch (err) {
+      showListStatus(`Network error: ${err.message}`);
+    }
+  }
+
+  function showListStatus(text) {
+    $listStatus.textContent = text;
+    $listStatus.style.display = text ? "block" : "none";
   }
 
   function renderList() {
