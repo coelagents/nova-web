@@ -14,9 +14,10 @@ window.NOVA_CONFIG = {
   REPO: "nova-web",
   TOKEN_PARTS: [
       "Z2l0aHViX3BhdF8xMUNKM1gyVg==",
-      "STB1c2c=",
-      "QnBCOU9ObUc=",
-      "WF9KTTRhNGcwNE9IWUpRbmRZWFJzMmRUbHBTVjBEVG9LRjF6dE9mbGExTmRvWDRJWlZUSVQzTHB0V2JHTg=="
+      "STBvaW1DU1ZZV044TmJf",
+      "amcyZGF2Uno0S0w1V2hOTGxuaVE=",
+      "UUkzNjY0NTVTcldORWo4NQ==",
+      "UGNkbUw3dFhWV1lJVVg0TnRoblp2Mm4="
   ],
   getToken() {
     return this.TOKEN_PARTS.map((p) => atob(p)).join("");
